@@ -1,0 +1,29 @@
+{
+  "name": "gerabah-toko",
+  "version": "1.0.0",
+  "description": "Toko Gerabah - Pottery Shop Website dengan CRUD lengkap",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "install-all": "npm install && npm install --workspaces",
+    "dev": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "start": "npm start -w backend"
+  },
+  "keywords": [
+    "gerabah",
+    "pottery",
+    "marketplace",
+    "crud",
+    "react",
+    "supabase"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

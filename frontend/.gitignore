@@ -1,0 +1,6 @@
+# Frontend Directory
+node_modules/
+dist/
+.env.local
+*.log
+.DS_Store
