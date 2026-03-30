@@ -1,12 +1,29 @@
 import { useState, useEffect } from 'react'
 import './ProductModal.css'
 
+const CATEGORIES = [
+  'Piring & Mangkuk',
+  'Cangkir & Gelas',
+  'Vas & Pot Bunga',
+  'Teko & Kendi',
+  'Celengan & Box',
+  'Dekorasi Rumah',
+  'Peralatan Dapur',
+  'Hadiah & Souvenir',
+  'Koleksi',
+  'Tradisional',
+  'Modern',
+  'Kontemporer',
+  'Etnik'
+]
+
 function ProductModal({ product, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     stock: '',
+    category: '',
     image_url: ''
   })
 
@@ -17,6 +34,7 @@ function ProductModal({ product, onClose, onSubmit }) {
         description: product.description || '',
         price: product.price || '',
         stock: product.stock || '',
+        category: product.category || '',
         image_url: product.image_url || ''
       })
     }
@@ -101,6 +119,21 @@ function ProductModal({ product, onClose, onSubmit }) {
                 required
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="category">Kategori</label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+            >
+              <option value="">Pilih Kategori...</option>
+              {CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

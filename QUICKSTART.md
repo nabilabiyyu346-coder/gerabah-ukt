@@ -48,7 +48,9 @@ npm install
 
 1. Buat akun di [supabase.com](https://supabase.com)
 2. Buat project baru
-3. Jalankan SQL query dari [DATABASE_SETUP.md](DATABASE_SETUP.md)
+3. Jalankan SQL queries dari:
+   - [DATABASE_SETUP.md](DATABASE_SETUP.md) - untuk products table
+   - [AUTH_SETUP.md](AUTH_SETUP.md) - untuk users table
 4. Copy credentials:
    - `SUPABASE_URL`
    - `SUPABASE_KEY`
@@ -59,6 +61,8 @@ npm install
 ```
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRE=86400
 PORT=5000
 ```
 
@@ -94,15 +98,39 @@ npm run dev
 ### Test Backend API
 
 ```bash
-# Get all products
+# Get all products (public endpoint)
 curl http://localhost:5000/api/products
 
-# Create product
-curl -X POST http://localhost:5000/api/products \
+# Register new user
+curl -X POST http://localhost:5000/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Gerabah Test",
-    "description": "Test product",
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "password123",
+    "full_name": "Test User"
+  }'
+
+# Login
+curl -X POST http://localhost:5000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123"
+  }'
+
+# Save token dari response, kemudian:
+
+# Get current user
+curl http://localhost:5000/auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Create product (protected endpoint)
+curl -X POST http://localhost:5000/api/products \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "name": "Test Product",
     "price": 50000,
     "stock": 10
   }'
@@ -113,10 +141,13 @@ curl -X POST http://localhost:5000/api/products \
 Buka browser: `http://localhost:3000`
 
 Try:
-- ✅ Click "+ Tambah Produk"
-- ✅ Fill form dan submit
+- ✅ Click "Daftar" → Register akun
+- ✅ Login dengan akun baru
+- ✅ Lihat navbar → username muncul
+- ✅ Click "+ Tambah Produk" → Modal terbuka
+- ✅ Tambah produk baru
 - ✅ Edit produk
-- ✅ Delete produk
+- ✅ Logout dari user menu
 
 ## 📁 File Structure
 
@@ -213,14 +244,18 @@ npm run build        # Build both
 
 - [ ] Node.js v18+ terinstall
 - [ ] Supabase project dibuat
-- [ ] Database table "products" sudah ada
+- [ ] Database tables dibuat (products & users)
 - [ ] .env files sudah dikonfigurasi
 - [ ] Backend running di port 5000
 - [ ] Frontend running di port 3000
+- [ ] Can register new account
+- [ ] Can login
+- [ ] Can see user info in navbar
 - [ ] Can create product
 - [ ] Can read products
 - [ ] Can update product
 - [ ] Can delete product
+- [ ] Can logout
 
 ## 🎯 Next Steps
 

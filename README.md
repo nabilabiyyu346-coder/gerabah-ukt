@@ -5,6 +5,8 @@ Website marketplace toko gerabah dengan fitur CRUD lengkap, menggunakan React-Vi
 ## 📋 Fitur
 
 ✅ **CRUD Operations** - Create, Read, Update, Delete produk gerabah
+✅ **User Authentication** - Register, Login, Logout dengan JWT
+✅ **Protected Routes** - Hanya user yang login bisa manage produk
 ✅ **Modern UI** - Desain seperti Lazada dengan warna cokelat kayu cendana
 ✅ **Responsive Design** - Mobile-friendly interface
 ✅ **Real-time Database** - Integrasi Supabase
@@ -51,20 +53,9 @@ gerabah-ukt/
 
 1. Buat akun di [supabase.com](https://supabase.com)
 2. Buat project baru
-3. Buat table `products` dengan schema:
-
-```sql
-CREATE TABLE products (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  price NUMERIC(10, 2) NOT NULL,
-  stock INTEGER NOT NULL,
-  image_url TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+3. Buat dua table:
+   - **products** table: Untuk produk gerabah
+   - **users** table: Untuk user authentication (baca [AUTH_SETUP.md](AUTH_SETUP.md))
 
 4. Copy URL dan API Key dari Supabase
 
@@ -74,9 +65,12 @@ CREATE TABLE products (
 cd backend
 npm install
 
-# Edit .env file dengan credentials Supabase
+# Edit .env file dengan credentials Supabase & JWT
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRE=86400
+PORT=5000
 
 # Start development server
 npm run dev
@@ -172,10 +166,12 @@ Backend URL: `https://your-app.onrender.com/api`
 
 ## 📝 Penggunaan
 
-1. **Tambah Produk**: Klik tombol "+ Tambah Produk" di navbar
-2. **Edit Produk**: Klik tombol "✏️ Edit" pada setiap produk
-3. **Hapus Produk**: Klik tombol "🗑️ Hapus" (akan ada konfirmasi)
-4. **Cari Produk**: Gunakan search bar (fitur dapat dikembangkan lebih lanjut)
+1. **Register**: Klik "Daftar" dan buat akun baru
+2. **Login**: Masuk dengan email dan password
+3. **Tambah Produk**: Klik tombol "+ Tambah Produk" (hanya untuk user yang login)
+4. **Edit Produk**: Klik tombol "✏️ Edit" pada setiap produk
+5. **Hapus Produk**: Klik tombol "🗑️ Hapus" (akan ada konfirmasi)
+6. **Logout**: Klik nama user di navbar → Logout
 
 ## 🛠️ Teknologi
 
@@ -244,6 +240,16 @@ Buka `http://localhost:3000` di browser
 - [Supabase Documentation](https://supabase.com/docs)
 - [Express Documentation](https://expressjs.com)
 - [Render Documentation](https://render.com/docs)
+
+## 📖 Project Documentation
+
+- [QUICKSTART.md](QUICKSTART.md) - Panduan cepat setup
+- [AUTH_SETUP.md](AUTH_SETUP.md) - Database users setup
+- [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md) - Implementasi authentication
+- [DATABASE_SETUP.md](DATABASE_SETUP.md) - Database schema & queries
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deploy ke Render.com
+- [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - Complete API reference
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
 
 ## 👨‍💻 Pengembangan Lebih Lanjut
 

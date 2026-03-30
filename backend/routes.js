@@ -1,9 +1,10 @@
 import express from 'express'
 import { supabase } from './db.js'
+import { authMiddleware } from './authRoutes.js'
 
 const router = express.Router()
 
-// GET all products
+// GET all products (public)
 router.get('/products', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -49,8 +50,8 @@ router.get('/products/:id', async (req, res) => {
   }
 })
 
-// CREATE product
-router.post('/products', async (req, res) => {
+// CREATE product (protected - requires login)
+router.post('/products', authMiddleware, async (req, res) => {
   try {
     const { name, description, price, stock, image_url } = req.body
 
@@ -88,8 +89,8 @@ router.post('/products', async (req, res) => {
   }
 })
 
-// UPDATE product
-router.put('/products/:id', async (req, res) => {
+// UPDATE product (protected - requires login)
+router.put('/products/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
     const { name, description, price, stock, image_url } = req.body
@@ -131,8 +132,8 @@ router.put('/products/:id', async (req, res) => {
   }
 })
 
-// DELETE product
-router.delete('/products/:id', async (req, res) => {
+// DELETE product (protected - requires login)
+router.delete('/products/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
 

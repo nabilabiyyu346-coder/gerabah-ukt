@@ -10,23 +10,30 @@ gerabah-ukt/
 ├── 📂 frontend/                    # React-Vite Frontend
 │   ├── 📂 src/
 │   │   ├── 📂 components/
-│   │   │   ├── Navbar.jsx         # Navigation bar with brand
-│   │   │   ├── Navbar.css         # Navbar styling
-│   │   │   ├── ProductGrid.jsx    # Product grid layout
-│   │   │   ├── ProductGrid.css    # Grid styling
-│   │   │   ├── ProductCard.jsx    # Individual product card
-│   │   │   ├── ProductCard.css    # Card styling
-│   │   │   ├── ProductModal.jsx   # Modal for add/edit
-│   │   │   └── ProductModal.css   # Modal styling
+│   │   │   ├── Navbar.jsx         # Navigation bar with user menu
+│   │   │   ├── Navbar.css
+│   │   │   ├── Login.jsx          # Login page
+│   │   │   ├── Register.jsx       # Register page
+│   │   │   ├── LoginRegister.css  # Auth pages styling
+│   │   │   ├── ProductGrid.jsx
+│   │   │   ├── ProductGrid.css
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductCard.css
+│   │   │   ├── ProductModal.jsx
+│   │   │   ├── ProductModal.css
+│   │   │   └── ProtectedRoute.jsx # Route protection wrapper
+│   │   │
+│   │   ├── 📂 contexts/
+│   │   │   └── AuthContext.jsx    # Auth state & context
 │   │   │
 │   │   ├── 📂 services/
-│   │   │   ├── api.js             # Axios instance
-│   │   │   └── productService.js  # API methods
+│   │   │   ├── api.js
+│   │   │   └── productService.js
 │   │   │
-│   │   ├── App.jsx                # Main app component
-│   │   ├── App.css                # App styling
-│   │   ├── main.jsx               # React entry point
-│   │   └── index.css              # Global styles
+│   │   ├── App.jsx                # Main app with routing
+│   │   ├── App.css
+│   │   ├── main.jsx
+│   │   └── index.css
 │   │
 │   ├── index.html                 # HTML template
 │   ├── package.json               # Dependencies
@@ -36,7 +43,9 @@ gerabah-ukt/
 │
 ├── 📂 backend/                     # Node.js/Express Backend
 │   ├── server.js                  # Express server setup
-│   ├── routes.js                  # API routes (CRUD)
+│   ├── routes.js                  # Product CRUD routes
+│   ├── authRoutes.js              # Auth routes (register, login, etc)
+│   ├── auth.js                    # JWT & password utilities
 │   ├── db.js                      # Supabase client
 │   ├── package.json               # Dependencies
 │   ├── .env                       # Environment variables
@@ -44,7 +53,9 @@ gerabah-ukt/
 │
 ├── 📄 README.md                   # Main documentation
 ├── 📄 QUICKSTART.md               # Quick start guide
-├── 📄 DATABASE_SETUP.md           # Database setup guide
+├── 📄 DATABASE_SETUP.md           # Products table setup
+├── 📄 AUTH_SETUP.md               # Users table & security setup
+├── 📄 AUTH_IMPLEMENTATION.md      # Auth feature guide
 ├── 📄 DEPLOYMENT.md               # Render.com deployment
 ├── 📄 API_DOCUMENTATION.md        # Complete API docs
 ├── 📄 CONTRIBUTING.md             # Contribution guidelines
@@ -206,10 +217,18 @@ gerabah-ukt/
   - Update: Edit product details
   - Delete: Remove products
 
+- ✅ **User Authentication**
+  - Register: Create new account
+  - Login: Sign in with email/password
+  - Logout: Sign out
+  - Protected routes: Only authenticated users can CRUD
+
 - ✅ **Frontend**
+  - Login & Register pages
   - Responsive grid layout (Lazada-style)
   - Product cards with info
   - Add/Edit/Delete modals
+  - User menu with profile info
   - Search input (ready for implementation)
   - Loading states
   - Error handling & display
@@ -217,21 +236,25 @@ gerabah-ukt/
 - ✅ **Backend**
   - Express server
   - RESTful API endpoints
+  - Authentication endpoints
   - Input validation
+  - JWT token-based auth
   - Error handling
   - CORS enabled
 
 - ✅ **Database**
   - Supabase PostgreSQL
   - Products table
-  - Timestamps (created_at, updated_at)
-  - RLS ready
+  - Users table with password hashing
+  - Timestamps
+  - RLS enabled
 
 - ✅ **Styling**
   - Brown wooden color theme
   - Responsive design
   - Hover effects
   - Mobile-friendly
+  - Modern auth UI
 
 ## 🚀 Quick Commands
 
@@ -313,41 +336,47 @@ PORT=5000
 Possible improvements:
 - [ ] Search and filter functionality
 - [ ] Product categories
-- [ ] User authentication
 - [ ] Rating and reviews
 - [ ] Shopping cart
 - [ ] Payment integration
 - [ ] Order management
-- [ ] Admin dashboard
+- [ ] Admin dashboard with stats
 - [ ] Inventory management
 - [ ] Sales analytics
+- [ ] User profile & avatar
+- [ ] Product recommendations
+- [ ] Email notifications
 
 ## 📚 File Statistics
 
 - **Total Files**: 30+
-- **Frontend Components**: 4
-- **Backend Routes**: 5
-- **Documentation Files**: 7
+- **Frontend Components**: 7 (+ Login, Register, ProtectedRoute)
+- **Backend Routes**: 8 (5 CRUD + 3 Auth)
+- **Documentation Files**: 8
 - **Configuration Files**: 6
 
 ## ⚙️ How to Use This Project
 
-1. **For Development**: Follow [QUICKSTART.md](QUICKSTART.md)
-2. **For Database Setup**: Follow [DATABASE_SETUP.md](DATABASE_SETUP.md)
-3. **For Deployment**: Follow [DEPLOYMENT.md](DEPLOYMENT.md)
-4. **For API Usage**: Refer [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
-5. **For Contribution**: Read [CONTRIBUTING.md](CONTRIBUTING.md)
+1. **For Quick Setup**: Follow [QUICKSTART.md](QUICKSTART.md)
+2. **For Products Database**: Follow [DATABASE_SETUP.md](DATABASE_SETUP.md)
+3. **For Users & Auth Database**: Follow [AUTH_SETUP.md](AUTH_SETUP.md)
+4. **For Auth Feature Implementation**: Read [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md)
+5. **For Deployment**: Follow [DEPLOYMENT.md](DEPLOYMENT.md)
+6. **For API Usage**: Refer [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+7. **For Contribution**: Read [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-**Project Status**: ✅ Ready for Development
+**Project Status**: ✅ Ready for Development with Full Authentication
 
 All files created and documented. Ready to:
 1. Install dependencies
-2. Setup Supabase database
+2. Setup Supabase database tables (products & users)
 3. Configure environment variables
 4. Run development server
-5. Deploy to Render.com
+5. Test register/login functionality
+6. Test CRUD operations
+7. Deploy to Render.com
 
 ---
 

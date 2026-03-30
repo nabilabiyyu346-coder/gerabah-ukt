@@ -41,6 +41,8 @@ CREATE POLICY "Enable delete for all users" ON products
   FOR DELETE USING (true);
 ```
 
+**PENTING**: Jangan lupa juga create **users table**. Lihat [AUTH_SETUP.md](AUTH_SETUP.md) untuk users table setup.
+
 ### Alternative: GUI Method
 
 1. Login ke Supabase Dashboard
