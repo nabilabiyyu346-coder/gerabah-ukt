@@ -13,7 +13,8 @@ function Home() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/products')
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+        const response = await axios.get(`${apiUrl}/products`)
         setFeaturedProducts(response.data.slice(0, 6))
       } catch (err) {
         console.error('Error fetching products:', err)

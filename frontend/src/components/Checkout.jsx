@@ -90,8 +90,9 @@ function Checkout() {
       console.log('Submitting order:', order)
 
       // Simpan order ke backend
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
       const response = await axios.post(
-        'http://localhost:5000/api/orders',
+        `${apiUrl}/orders`,
         order,
         {
           headers: {
