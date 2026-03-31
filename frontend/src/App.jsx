@@ -12,6 +12,7 @@ import Cart from './components/Cart'
 import Checkout from './components/Checkout'
 import Login from './components/Login'
 import Register from './components/Register'
+import Profile from './components/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
 import axios from 'axios'
 
@@ -52,7 +53,7 @@ function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const { isAuthenticated, token } = useAuth()
+  const { isAuthenticated, token, user } = useAuth()
 
   const API_URL = 'http://localhost:5000/api'
 
@@ -133,6 +134,12 @@ function ProductsPage() {
       window.location.href = '/login'
       return
     }
+    
+    if (user?.role !== 'admin') {
+      setError('Hanya admin yang dapat menambah/mengedit produk')
+      return
+    }
+    
     setEditingProduct(product)
     setShowModal(true)
   }
@@ -185,8 +192,8 @@ function ProductsPage() {
             </div>
             <ProductGrid 
               products={filteredProducts}
-              onEdit={handleOpenModal}
-              onDelete={handleDeleteProduct}
+              onEdit={user?.role === 'admin' ? handleOpenModal : undefined}
+              onDelete={user?.role === 'admin' ? handleDeleteProduct : undefined}
             />
           </>
         )}
@@ -214,6 +221,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="*" element={<Navigate to="/" replace />} />

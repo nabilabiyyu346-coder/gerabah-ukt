@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
+import Navbar from './Navbar'
 import axios from 'axios'
 import './Checkout.css'
 
@@ -24,6 +25,12 @@ function Checkout() {
   const [loading, setLoading] = useState(false)
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [orderId, setOrderId] = useState(null)
+  const [orderTotal, setOrderTotal] = useState(0)
+
+  // Debug: Log when orderPlaced changes
+  useEffect(() => {
+    console.log('Order placed state changed:', orderPlaced)
+  }, [orderPlaced])
 
   if (!isAuthenticated) {
     return (
@@ -80,6 +87,8 @@ function Checkout() {
         status: 'pending'
       }
 
+      console.log('Submitting order:', order)
+
       // Simpan order ke backend
       const response = await axios.post(
         'http://localhost:5000/api/orders',
@@ -92,13 +101,23 @@ function Checkout() {
         }
       )
 
-      setOrderId(response.data.id)
-      setOrderPlaced(true)
-      clearCart()
+      console.log('Order response:', response.data)
+
+      if (response.data.id) {
+        console.log('✅ Order placed successfully! ID:', response.data.id)
+        setOrderId(response.data.id)
+        setOrderTotal(getTotalPrice()) // Save total BEFORE clearing cart
+        setOrderPlaced(true)
+        clearCart()
+      } else {
+        console.error('❌ No order ID in response')
+        throw new Error('No order ID returned')
+      }
 
     } catch (err) {
       console.error('Error placing order:', err)
-      alert('Gagal membuat pesanan: ' + (err.response?.data?.error || err.message))
+      const errorMessage = err.response?.data?.error || err.message || 'Gagal membuat pesanan'
+      alert('❌ ' + errorMessage)
     } finally {
       setLoading(false)
     }
@@ -106,48 +125,111 @@ function Checkout() {
 
   if (orderPlaced) {
     return (
-      <div className="checkout-success">
-        <div className="success-content">
-          <div className="success-icon">✓</div>
-          <h2>Pesanan Berhasil!</h2>
-          <p>Terima kasih telah berbelanja di Toko Gerabah Sejati</p>
-          
-          <div className="order-details">
-            <div className="detail-row">
-              <span>Nomor Pesanan</span>
-              <span className="detail-value">#{orderId}</span>
+      <>
+        <Navbar />
+        <div className="checkout-success-container">
+          <div className="checkout-success">
+            <div className="success-header">
+              <div className="success-icon">✓</div>
+              <h1>Pesanan Berhasil Dibuat!</h1>
+              <p className="success-subtitle">Terima kasih telah berbelanja di Toko Gerabah Sejati</p>
             </div>
-            <div className="detail-row">
-              <span>Total Pembayaran</span>
-              <span className="detail-value">Rp {getTotalPrice().toLocaleString()}</span>
-            </div>
-            <div className="detail-row">
-              <span>Status</span>
-              <span className="detail-value status-pending">Menunggu Pembayaran</span>
-            </div>
-          </div>
 
-          <p className="info-text">
-            💳 Silakan lakukan pembayaran sesuai metode yang dipilih. 
-            Pesanan Anda akan diproses setelah kami mengkonfirmasi pembayaran.
-          </p>
+            <div className="success-content">
+              <div className="order-confirmation">
+                <div className="confirmation-section">
+                  <h3>📋 Nomor Pesanan</h3>
+                  <div className="order-number">#{orderId}</div>
+                  <p className="order-note">Simpan nomor ini untuk referensi pesanan Anda</p>
+                </div>
 
-          <div className="success-buttons">
-            <button className="btn-primary" onClick={() => navigate('/')}>
-              Kembali ke Beranda
-            </button>
-            <button className="btn-secondary" onClick={() => navigate('/products')}>
-              Lanjut Belanja
-            </button>
+                <div className="confirmation-section">
+                  <h3>💰 Detail Pembayaran</h3>
+                  <div className="payment-details">
+                    <div className="detail-row">
+                      <span>Total Pesanan</span>
+                      <span className="amount">Rp {orderTotal.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span>Status</span>
+                      <span className="status-badge pending">⏳ Menunggu Pembayaran</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="confirmation-section">
+                  <h3>🚚 Pengiriman Ke</h3>
+                  <div className="shipping-details">
+                    <p><strong>{formData.fullName}</strong></p>
+                    <p>{formData.address}</p>
+                    <p>{formData.city}, {formData.province} {formData.postalCode}</p>
+                    <p>📞 {formData.phone}</p>
+                  </div>
+                </div>
+
+                <div className="confirmation-section">
+                  <h3>💳 Metode Pembayaran</h3>
+                  <div className="payment-method">
+                    {formData.paymentMethod === 'bank_transfer' && '🏦 Transfer Bank'}
+                    {formData.paymentMethod === 'e_wallet' && '📱 E-Wallet (GCash, OVO, Dana)'}
+                    {formData.paymentMethod === 'credit_card' && '💳 Kartu Kredit'}
+                    {formData.paymentMethod === 'cod' && '🚪 Bayar di Tempat (COD)'}
+                  </div>
+                </div>
+
+                <div className="confirmation-section highlight">
+                  <h3>⚠️ Langkah Selanjutnya</h3>
+                  <ol className="next-steps">
+                    <li>
+                      <strong>Lakukan Pembayaran</strong><br/>
+                      Silakan transfer/bayar sesuai metode yang dipilih. Tim kami akan mengkonfirmasi pembayaran Anda.
+                    </li>
+                    <li>
+                      <strong>Verifikasi Pesanan</strong><br/>
+                      Setelah kami menerima pembayaran, pesanan akan dikonfirmasi dalam 1-2 jam kerja.
+                    </li>
+                    <li>
+                      <strong>Pengiriman</strong><br/>
+                      Kami akan mengirimkan gerabah Anda dalam 2-3 hari kerja setelah pembayaran dikonfirmasi.
+                    </li>
+                  </ol>
+                </div>
+
+                <div className="confirmation-section">
+                  <h3>📧 Notifikasi</h3>
+                  <p>Kami akan mengirimkan update pesanan Anda ke email: <strong>{formData.email}</strong></p>
+                </div>
+              </div>
+
+              <div className="success-actions">
+                <button 
+                  className="btn-home"
+                  onClick={() => navigate('/')}
+                >
+                  🏠 Kembali ke Beranda
+                </button>
+                <button 
+                  className="btn-continue-shopping"
+                  onClick={() => navigate('/products')}
+                >
+                  🛍️ Lanjut Belanja
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="checkout-container">
-      <h1>💳 Checkout</h1>
+    <>
+      <Navbar />
+      <div className="checkout-container">
+        <div className="checkout-header">
+          <h1>💳 Checkout</h1>
+          <p className="checkout-user-info">👤 Checkout sebagai: <strong>{user?.full_name || user?.username}</strong></p>
+        </div>
 
       <div className="checkout-content">
         {/* Checkout Form */}
@@ -350,6 +432,7 @@ function Checkout() {
         </aside>
       </div>
     </div>
+    </>
   )
 }
 

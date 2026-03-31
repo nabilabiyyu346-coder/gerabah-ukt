@@ -50,10 +50,17 @@ router.get('/products/:id', async (req, res) => {
   }
 })
 
-// CREATE product (protected - requires login)
+// CREATE product (protected - requires login and admin role)
 router.post('/products', authMiddleware, async (req, res) => {
   try {
-    const { name, description, price, stock, image_url } = req.body
+    // Check if user is admin
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Hanya admin yang dapat menambah produk' 
+      })
+    }
+
+    const { name, description, price, stock, image_url, category } = req.body
 
     // Validation
     if (!name || !price || stock === undefined) {
@@ -70,6 +77,7 @@ router.post('/products', authMiddleware, async (req, res) => {
           description: description || '',
           price: parseFloat(price),
           stock: parseInt(stock),
+          category: category || null,
           image_url: image_url || null,
           created_at: new Date().toISOString()
         }
@@ -89,11 +97,18 @@ router.post('/products', authMiddleware, async (req, res) => {
   }
 })
 
-// UPDATE product (protected - requires login)
+// UPDATE product (protected - requires login and admin role)
 router.put('/products/:id', authMiddleware, async (req, res) => {
   try {
+    // Check if user is admin
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Hanya admin yang dapat mengedit produk' 
+      })
+    }
+
     const { id } = req.params
-    const { name, description, price, stock, image_url } = req.body
+    const { name, description, price, stock, image_url, category } = req.body
 
     // Validation
     if (!name || !price || stock === undefined) {
@@ -109,6 +124,7 @@ router.put('/products/:id', authMiddleware, async (req, res) => {
         description: description || '',
         price: parseFloat(price),
         stock: parseInt(stock),
+        category: category || null,
         image_url: image_url || null,
         updated_at: new Date().toISOString()
       })
@@ -132,9 +148,16 @@ router.put('/products/:id', authMiddleware, async (req, res) => {
   }
 })
 
-// DELETE product (protected - requires login)
+// DELETE product (protected - requires login and admin role)
 router.delete('/products/:id', authMiddleware, async (req, res) => {
   try {
+    // Check if user is admin
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Hanya admin yang dapat menghapus produk' 
+      })
+    }
+
     const { id } = req.params
 
     const { data, error } = await supabase

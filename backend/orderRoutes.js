@@ -1,14 +1,19 @@
 import express from 'express'
-import { supabase } from './db.js'
-import { verifyToken } from './auth.js'
+import { supabase, supabaseAdmin } from './db.js'
+import { authMiddleware } from './authRoutes.js'
 
 const router = express.Router()
 
 // Create new order
-router.post('/orders', verifyToken, async (req, res) => {
+router.post('/orders', authMiddleware, async (req, res) => {
   try {
-    const { items, total_price, shipping_address, phone, payment_method } = req.body
-    const userId = req.user.id
+    const { items, total_price, shipping_address, phone, payment_method, user_id } = req.body
+    const userId = req.userId
+
+    // Security: Validate that user_id in body matches authenticated user
+    if (user_id && user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized: User ID mismatch' })
+    }
 
     // Validate input
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -19,8 +24,12 @@ router.post('/orders', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Semua field harus diisi' })
     }
 
-    // Insert order
-    const { data: order, error: orderError } = await supabase
+    if (total_price <= 0) {
+      return res.status(400).json({ error: 'Total harga harus lebih dari 0' })
+    }
+
+    // Insert order using supabaseAdmin to bypass RLS
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         user_id: userId,
@@ -36,7 +45,7 @@ router.post('/orders', verifyToken, async (req, res) => {
 
     if (orderError) {
       console.error('Order creation error:', orderError)
-      return res.status(400).json({ error: 'Gagal membuat pesanan' })
+      return res.status(400).json({ error: 'Gagal membuat pesanan: ' + orderError.message })
     }
 
     // Insert order items
@@ -47,7 +56,7 @@ router.post('/orders', verifyToken, async (req, res) => {
       price: item.price
     }))
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(orderItems)
 
@@ -58,7 +67,8 @@ router.post('/orders', verifyToken, async (req, res) => {
 
     res.status(201).json({
       id: order.id,
-      message: 'Pesanan berhasil dibuat'
+      message: 'Pesanan berhasil dibuat',
+      order_date: order.created_at
     })
 
   } catch (err) {
@@ -68,11 +78,11 @@ router.post('/orders', verifyToken, async (req, res) => {
 })
 
 // Get user orders
-router.get('/orders', verifyToken, async (req, res) => {
+router.get('/orders', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.userId
 
-    const { data: orders, error } = await supabase
+    const { data: orders, error } = await supabaseAdmin
       .from('orders')
       .select('*')
       .eq('user_id', userId)
@@ -86,7 +96,7 @@ router.get('/orders', verifyToken, async (req, res) => {
     // Get items for each order
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
-        const { data: items } = await supabase
+        const { data: items } = await supabaseAdmin
           .from('order_items')
           .select('*, products(name, image_url)')
           .eq('order_id', order.id)
@@ -107,12 +117,12 @@ router.get('/orders', verifyToken, async (req, res) => {
 })
 
 // Get order detail
-router.get('/orders/:id', verifyToken, async (req, res) => {
+router.get('/orders/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
-    const userId = req.user.id
+    const userId = req.userId
 
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .select('*')
       .eq('id', id)
@@ -123,7 +133,7 @@ router.get('/orders/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Pesanan tidak ditemukan' })
     }
 
-    const { data: items } = await supabase
+    const { data: items } = await supabaseAdmin
       .from('order_items')
       .select('*, products(id, name, image_url)')
       .eq('order_id', id)
@@ -140,7 +150,7 @@ router.get('/orders/:id', verifyToken, async (req, res) => {
 })
 
 // Update order status (admin only - simplified, no role check in this version)
-router.put('/orders/:id/status', verifyToken, async (req, res) => {
+router.put('/orders/:id/status', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -150,7 +160,7 @@ router.put('/orders/:id/status', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Status tidak valid' })
     }
 
-    const { data: order, error } = await supabase
+    const { data: order, error } = await supabaseAdmin
       .from('orders')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)

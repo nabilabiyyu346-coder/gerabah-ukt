@@ -132,8 +132,8 @@ router.post('/login', async (req, res) => {
       })
     }
 
-    // Find user by email
-    const { data: users, error: findError } = await supabase
+    // Find user by email - use supabaseAdmin to bypass RLS
+    const { data: users, error: findError } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('email', email)
@@ -164,8 +164,8 @@ router.post('/login', async (req, res) => {
       })
     }
 
-    // Update last login
-    await supabase
+    // Update last login - use supabaseAdmin
+    await supabaseAdmin
       .from('users')
       .update({
         last_login: new Date().toISOString(),
@@ -199,7 +199,7 @@ router.post('/login', async (req, res) => {
 // GET CURRENT USER endpoint
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('id, email, username, full_name, role, profile_picture_url')
       .eq('id', req.userId)
@@ -244,7 +244,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
   try {
     const { full_name, profile_picture_url } = req.body
 
-    const { data: updatedUser, error } = await supabase
+    const { data: updatedUser, error } = await supabaseAdmin
       .from('users')
       .update({
         full_name: full_name || undefined,

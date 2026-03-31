@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react'
+import { useAuth } from './AuthContext'
 
 const CartContext = createContext()
 
@@ -11,15 +12,45 @@ export const useCart = () => {
 }
 
 export const CartProvider = ({ children }) => {
-  const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem('cartItems')
-    return saved ? JSON.parse(saved) : []
-  })
+  const { user } = useAuth()
+  const [items, setItems] = useState([])
 
-  // Save to localStorage whenever items change
+  // Generate cart storage key based on user ID
+  const getCartKey = (userId) => {
+    return userId ? `cartItems_${userId}` : 'cartItems_guest'
+  }
+
+  // Load cart from localStorage when user changes
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(items))
-  }, [items])
+    const cartKey = getCartKey(user?.id)
+    const saved = localStorage.getItem(cartKey)
+    
+    console.log(`[Cart] Loading cart for user: ${user?.id || 'guest'}`, {
+      cartKey,
+      itemsCount: saved ? JSON.parse(saved).length : 0
+    })
+    
+    if (saved) {
+      try {
+        setItems(JSON.parse(saved))
+      } catch (err) {
+        console.error('Error parsing cart:', err)
+        setItems([])
+      }
+    } else {
+      setItems([])
+    }
+  }, [user?.id])
+
+  // Save cart to localStorage whenever items change
+  useEffect(() => {
+    const cartKey = getCartKey(user?.id)
+    console.log(`[Cart] Saving cart for user: ${user?.id || 'guest'}`, {
+      cartKey,
+      itemsCount: items.length
+    })
+    localStorage.setItem(cartKey, JSON.stringify(items))
+  }, [items, user?.id])
 
   const addToCart = (product, quantity = 1) => {
     setItems(prevItems => {

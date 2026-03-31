@@ -9,16 +9,23 @@ function Navbar({ onAddClick }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [showUserMenu, setShowUserMenu] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
-  const { getTotalItems } = useCart()
+  const { getTotalItems, clearCart } = useCart()
   
   const handleLogout = async () => {
     try {
       await logout()
-      window.location.href = '/login'
+      clearCart() // Clear cart for logged out user
+      navigate('/login')
     } catch (err) {
       console.error('Logout error:', err)
-      window.location.href = '/login'
+      clearCart()
+      navigate('/login')
     }
+  }
+
+  const handleProfileClick = () => {
+    setShowUserMenu(false)
+    navigate('/profile')
   }
 
   return (
@@ -59,9 +66,11 @@ function Navbar({ onAddClick }) {
 
           {isAuthenticated ? (
             <>
-              <button className="add-btn" onClick={onAddClick}>
-                + Tambah Produk
-              </button>
+              {user?.role === 'admin' && (
+                <button className="add-btn" onClick={onAddClick}>
+                  + Tambah Produk
+                </button>
+              )}
               <div className="user-menu">
                 <button 
                   className="user-button"
@@ -76,7 +85,7 @@ function Navbar({ onAddClick }) {
                       <p className="user-email">{user?.email}</p>
                     </div>
                     <hr />
-                    <button className="dropdown-item" onClick={() => window.location.href = '/profile'}>
+                    <button className="dropdown-item" onClick={handleProfileClick}>
                       ⚙️ Profil
                     </button>
                     <button className="dropdown-item logout" onClick={handleLogout}>

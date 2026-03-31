@@ -5,7 +5,7 @@ import './Cart.css'
 
 function Cart() {
   const { items, removeFromCart, updateQuantity, getTotalPrice, getTotalItems } = useCart()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
 
   if (!isAuthenticated) {
@@ -40,7 +40,10 @@ function Cart() {
   return (
     <div className="cart-container">
       <div className="cart-header">
-        <h1>🛒 Keranjang Belanja</h1>
+        <div>
+          <h1>🛒 Keranjang Belanja</h1>
+          <p className="user-info">👤 {user?.full_name || user?.username}</p>
+        </div>
         <p>{getTotalItems()} produk</p>
       </div>
 
