@@ -1,15 +1,15 @@
 {
-  "buildCommand": "npm install",
-  "runtime": "nodejs20.x",
+  "buildCommand": "",
   "functions": {
-    "api/**/*.js": {
+    "api/index.js": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "**"
     }
   },
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/(.*)",
       "destination": "/api"
     }
   ]
