@@ -13,6 +13,7 @@ import Checkout from './components/Checkout'
 import Login from './components/Login'
 import Register from './components/Register'
 import Profile from './components/Profile'
+import Orders from './components/Orders'
 import ProtectedRoute from './components/ProtectedRoute'
 import axios from 'axios'
 
@@ -222,6 +223,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/orders" element={<Orders />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="*" element={<Navigate to="/" replace />} />

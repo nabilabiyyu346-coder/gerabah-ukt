@@ -28,6 +28,11 @@ function Navbar({ onAddClick }) {
     navigate('/profile')
   }
 
+  const handleOrdersClick = () => {
+    setShowUserMenu(false)
+    navigate('/orders')
+  }
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -85,6 +90,9 @@ function Navbar({ onAddClick }) {
                       <p className="user-email">{user?.email}</p>
                     </div>
                     <hr />
+                    <button className="dropdown-item" onClick={handleOrdersClick}>
+                      📦 Pesanan Saya
+                    </button>
                     <button className="dropdown-item" onClick={handleProfileClick}>
                       ⚙️ Profil
                     </button>

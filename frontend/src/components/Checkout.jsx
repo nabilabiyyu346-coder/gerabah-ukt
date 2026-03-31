@@ -76,9 +76,9 @@ function Checkout() {
       const order = {
         user_id: user?.id,
         items: items.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price
+          product_id: parseInt(item.id, 10), // Ensure integer
+          quantity: parseInt(item.quantity, 10), // Ensure integer
+          price: parseFloat(item.price) // Ensure decimal
         })),
         total_price: getTotalPrice(),
         shipping_address: `${formData.address}, ${formData.city}, ${formData.province} ${formData.postalCode}`,
