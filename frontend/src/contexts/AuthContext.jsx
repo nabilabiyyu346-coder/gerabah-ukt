@@ -25,23 +25,36 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem('token')
       if (storedToken) {
         try {
+          console.log('[AuthContext] Checking auth with stored token...')
           const response = await axios.get(`${API_URL}/auth/me`, {
             headers: {
               'Authorization': `Bearer ${storedToken}`
-            }
+            },
+            timeout: 5000 // 5 second timeout
           })
+          console.log('[AuthContext] ✓ Auth check successful, user:', response.data.user.username)
           setUser(response.data.user)
           setToken(storedToken)
         } catch (err) {
-          console.error('Auth check failed:', err)
-          localStorage.removeItem('token')
-          setToken(null)
+          console.error('[AuthContext] Auth check failed:', err.message)
+          // Don't clear token immediately - might be temporary network error
+          // Keep token but set user as loading
+          setUser(null)
+          setToken(storedToken) // Keep token in case network recovers
         }
       }
       setLoading(false)
     }
 
     checkAuth()
+    
+    // Set up interval to refresh auth every 12 hours (half of 24 hour token life)
+    const authRefreshInterval = setInterval(() => {
+      console.log('[AuthContext] Refreshing auth status...')
+      checkAuth()
+    }, 12 * 60 * 60 * 1000) // 12 hours
+
+    return () => clearInterval(authRefreshInterval)
   }, [])
 
   const register = async (email, username, password, fullName) => {

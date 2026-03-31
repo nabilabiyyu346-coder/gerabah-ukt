@@ -5,107 +5,86 @@ import productRoutes from '../routes.js'
 import authRoutes from '../authRoutes.js'
 import orderRoutes from '../orderRoutes.js'
 
+console.log('[STARTUP] Initializing API...')
+console.log('[STARTUP] NODE_ENV:', process.env.NODE_ENV)
+console.log('[STARTUP] SUPABASE_URL:', !!process.env.SUPABASE_URL)
+console.log('[STARTUP] SUPABASE_KEY:', !!process.env.SUPABASE_KEY)
+console.log('[STARTUP] ✓ All routes loaded')
+
 const app = express()
 
-// Log environment on startup (for debugging)
-console.log('🔍 Startup Check:')
-console.log('- NODE_ENV:', process.env.NODE_ENV)
-console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ Set' : '❌ Missing')
-console.log('- SUPABASE_KEY:', process.env.SUPABASE_KEY ? '✓ Set' : '❌ Missing')
-console.log('- JWT_SECRET:', process.env.JWT_SECRET ? '✓ Set' : '❌ Missing')
+console.log('[STARTUP] Setting up middleware...')
 
-// CORS configuration
-const corsOptions = {
+// CORS
+app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:3001',
-    process.env.FRONTEND_URL || '',
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ''
-  ].filter(url => url),
+    process.env.FRONTEND_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+    'https://gerabah-ukt.vercel.app'
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}
+}))
 
-// Middleware
-app.use(cors(corsOptions))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-// Request logging
+// Logging
 app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.path}`)
+  console.log(`[REQ] ${req.method} ${req.path}`)
   next()
 })
+
+console.log('[STARTUP] Mounting routes...')
 
 // Routes
 app.use('/api', productRoutes)
 app.use('/api', orderRoutes)
 app.use('/auth', authRoutes)
 
-// Root endpoint
+console.log('[STARTUP] Setting up endpoints...')
+
+// Root
 app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: '🏺 Toko Gerabah API Running',
-    service: 'Vercel Serverless',
-    version: '1.0.0'
+  res.json({ 
+    message: '🏺 Toko Gerabah API',
+    version: '1.0.0',
+    ts: new Date().toISOString()
   })
 })
 
-// Health check
+// Health
 app.get('/health', (req, res) => {
-  const health = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: {
-      NODE_ENV: process.env.NODE_ENV || 'development',
-      hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasSupabaseKey: !!process.env.SUPABASE_KEY,
-      hasJwtSecret: !!process.env.JWT_SECRET
+  res.json({
+    status: 'ok',
+    ts: new Date().toISOString(),
+    env: {
+      supabase: !!process.env.SUPABASE_URL,
+      jwt: !!process.env.JWT_SECRET
     }
-  }
-  
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-    health.warning = '⚠️ Missing Supabase credentials'
-  }
-  
-  res.status(200).json(health)
+  })
 })
 
-// 404 handler
+// 404
 app.use('*', (req, res) => {
-  console.log('⚠️ 404 Not Found:', req.path)
   res.status(404).json({ 
-    error: 'Route not found',
-    path: req.path,
-    method: req.method,
-    hint: 'Check your API endpoint path'
+    error: 'Not found',
+    path: req.path
   })
 })
 
-// Global error handler
+// Error handler
 app.use((err, req, res, next) => {
-  console.error('🔴 Error:', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method
-  })
-  
+  console.error('[ERR]', err.message)
   res.status(err.status || 500).json({ 
-    error: err.message || 'Internal server error',
-    path: req.path,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: err.message || 'Internal server error'
   })
 })
 
-// Graceful error handler for unhandled rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('🔴 Unhandled Rejection:', reason)
-})
-
-console.log('✅ API Server initialized successfully')
+console.log('[STARTUP] ✅ API Ready')
 
 export default app

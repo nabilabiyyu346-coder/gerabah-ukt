@@ -199,23 +199,33 @@ router.post('/login', async (req, res) => {
 // GET CURRENT USER endpoint
 router.get('/me', authMiddleware, async (req, res) => {
   try {
+    console.log('[AUTH] Getting current user:', req.userId)
     const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('id, email, username, full_name, role, profile_picture_url')
       .eq('id', req.userId)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('[AUTH] Supabase query error:', error.message)
+      throw error
+    }
 
     if (!user) {
+      console.log('[AUTH] User not found in database:', req.userId)
       return res.status(404).json({ error: 'User tidak ditemukan' })
     }
 
+    console.log('[AUTH] ✓ User data retrieved:', user.username)
     res.status(200).json({
       user
     })
   } catch (error) {
-    console.error('Get current user error:', error)
+    console.error('[AUTH] Get current user error:', {
+      message: error.message,
+      code: error.code,
+      userId: req.userId
+    })
     res.status(500).json({
       error: 'Gagal mengambil data user',
       details: error.message

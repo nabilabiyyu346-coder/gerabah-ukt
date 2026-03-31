@@ -5,7 +5,13 @@ import { v4 as uuidv4 } from 'uuid'
 // Generate JWT token
 export const generateToken = (userId, email, username, role) => {
   const secret = process.env.JWT_SECRET || 'your-secret-key'
-  const expiresIn = process.env.JWT_EXPIRE || 86400 // 24 hours
+  const expiresIn = parseInt(process.env.JWT_EXPIRE || '86400', 10) // 24 hours default
+
+  console.log('[AUTH] Token generation:', {
+    userId,
+    expiresIn,
+    expiresInSeconds: expiresIn
+  })
 
   return jwt.sign(
     {
@@ -15,7 +21,7 @@ export const generateToken = (userId, email, username, role) => {
       role
     },
     secret,
-    { expiresIn }
+    { expiresIn } // jwt library automatically converts seconds to expiration
   )
 }
 
@@ -23,9 +29,18 @@ export const generateToken = (userId, email, username, role) => {
 export const verifyToken = (token) => {
   try {
     const secret = process.env.JWT_SECRET || 'your-secret-key'
-    return jwt.verify(token, secret)
+    const decoded = jwt.verify(token, secret)
+    console.log('[AUTH] Token verified:', {
+      userId: decoded.id,
+      expiresAt: new Date(decoded.exp * 1000).toISOString()
+    })
+    return decoded
   } catch (error) {
-    console.error('Token verification error:', error.message)
+    console.error('[AUTH] Token verification error:', {
+      message: error.message,
+      name: error.name,
+      tokenAge: error.expiredAt ? `Expired at: ${error.expiredAt}` : 'N/A'
+    })
     return null
   }
 }
