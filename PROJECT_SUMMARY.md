@@ -53,14 +53,6 @@ gerabah-ukt/
 │
 ├── 📄 README.md                   # Main documentation
 ├── 📄 QUICKSTART.md               # Quick start guide
-├── 📄 DATABASE_SETUP.md           # Products table setup
-├── 📄 AUTH_SETUP.md               # Users table & security setup
-├── 📄 AUTH_IMPLEMENTATION.md      # Auth feature guide
-├── 📄 DEPLOYMENT.md               # Render.com deployment
-├── 📄 API_DOCUMENTATION.md        # Complete API docs
-├── 📄 CONTRIBUTING.md             # Contribution guidelines
-├── 📄 package.json                # Root package.json
-├── 📄 .gitignore                  # Root git ignore
 └── 📄 PROJECT_SUMMARY.md          # This file
 ```
 
